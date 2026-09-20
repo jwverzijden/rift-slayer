@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rift Slayer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="game">
+    <div id="stage">
+      <canvas id="view" width="960" height="540"></canvas>
+
+      <!-- In-game HUD -->
+      <div id="hud" style="display:none">
+        <div class="bar-row">
+          <div class="bar" id="bar-hp"><div class="fill"></div><div class="lbl">HP</div></div>
+          <div class="bar" id="bar-mana"><div class="fill"></div><div class="lbl">MP</div></div>
+          <div class="bar" id="bar-run"><div class="fill"></div><div class="lbl">RUN</div></div>
+        </div>
+        <div class="char-tag" id="char-tag"></div>
+        <div class="resource-top" id="resources"></div>
+        <div id="rift-banner"></div>
+        <div id="hint"></div>
+        <div id="skillbar"></div>
+      </div>
+
+      <!-- Main menu -->
+      <div class="screen open" id="menu-screen">
+        <div class="panel" style="text-align:center">
+          <h1 class="title">RIFT SLAYER</h1>
+          <p class="subtitle">Enter the rift and defeat the monsters to return with glorious trophies!</p>
+          <div class="row" style="justify-content:center; margin-top:12px">
+            <button class="primary" id="btn-continue">Continue</button>
+            <button class="primary" id="btn-new">New Game</button>
+          </div>
+          <div class="row" style="justify-content:center; margin-top:12px">
+            <button id="btn-options">Options</button>
+          </div>
+          <p class="muted" id="menu-save-info" style="margin-top:18px"></p>
+        </div>
+      </div>
+
+      <!-- Character creation -->
+      <div class="screen" id="char-screen">
+        <div class="panel">
+          <h2>Create Character</h2>
+          <div class="row" style="margin-bottom:12px">
+            <label for="inp-name">Name</label>
+            <input type="text" id="inp-name" maxlength="20" placeholder="Hero name" />
+          </div>
+          <h3>Choose a class</h3>
+          <div class="row" id="class-cards"></div>
+          <h3>Difficulty</h3>
+          <div class="row" id="diff-opts"></div>
+          <div class="spacer"></div>
+          <div class="row">
+            <button class="primary" id="btn-create">Create Character</button>
+            <button id="btn-create-back">Back</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause menu -->
+      <div class="screen" id="pause-screen">
+        <div class="panel" style="text-align:center; max-width:420px">
+          <h2>Paused</h2>
+          <div class="row" style="flex-direction:column; gap:10px; align-items:stretch">
+            <button class="primary" id="btn-resume">Continue</button>
+            <button id="btn-save">Save Game</button>
+            <button id="btn-pause-options">Options</button>
+            <button id="btn-mainmenu">Back to Main Menu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="screen" id="options-screen">
+        <div class="panel" style="max-width:520px">
+          <h2>Options</h2>
+          <div class="row" style="margin-bottom:8px">
+            <label style="width:170px">Sound volume</label>
+            <input type="range" id="vol-slider" min="0" max="100" value="60" style="flex:1" />
+            <span id="vol-label" style="width:44px; text-align:right">60%</span>
+          </div>
+          <div class="row" style="margin-bottom:8px">
+            <label style="width:170px">Sound enabled</label>
+            <input type="checkbox" id="sound-toggle" checked />
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <button id="btn-keybinds">Keybindings</button>
+            <span class="grow"></span>
+            <button class="primary" id="btn-options-done">Done</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keybindings -->
+      <div class="screen" id="keybind-screen">
+        <div class="panel" style="max-width:520px">
+          <h2>Keybindings</h2>
+          <p class="muted">Click a binding, then press the new key. Press Esc to cancel.</p>
+          <div id="keybind-list"></div>
+          <div class="spacer"></div>
+          <div class="row">
+            <button id="btn-keybind-reset">Reset defaults</button>
+            <span class="grow"></span>
+            <button class="primary" id="btn-keybind-done">Done</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory -->
+      <div class="screen" id="inventory-screen">
+        <div class="panel">
+          <div class="row" style="align-items:flex-start">
+            <div>
+              <h3>Equipment</h3>
+              <div class="grid equip-grid" id="equip-grid"></div>
+              <div class="spacer"></div>
+              <div id="char-stats" class="statline"></div>
+            </div>
+            <div style="width:20px"></div>
+            <div class="grow">
+              <div class="row" style="margin-bottom:8px">
+                <h3 style="margin:0">Bag</h3>
+                <span class="grow"></span>
+                <span class="muted" id="bag-count"></span>
+              </div>
+              <div class="grid inv-grid scroll" id="bag-grid"></div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <span class="muted" id="inv-gold"></span>
+            <span class="grow"></span>
+            <button id="btn-inv-close" class="primary">Close (I)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shop -->
+      <div class="screen" id="shop-screen">
+        <div class="panel">
+          <h2>Shop</h2>
+          <div class="row" style="align-items:flex-start">
+            <div class="grow">
+              <h3>Buy</h3>
+              <div id="shop-buy" class="scroll" style="max-height:48vh"></div>
+            </div>
+            <div style="width:20px"></div>
+            <div class="grow">
+              <h3>Sell</h3>
+              <div id="shop-sell" class="scroll" style="max-height:48vh"></div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <span class="muted" id="shop-gold"></span>
+            <span class="grow"></span>
+            <button class="primary" id="btn-shop-close">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shrine -->
+      <div class="screen" id="shrine-screen">
+        <div class="panel">
+          <h2>Shrine</h2>
+          <div class="row" style="align-items:flex-start">
+            <div class="grow">
+              <h3>Talents</h3>
+              <div id="shrine-talents" class="scroll" style="max-height:48vh"></div>
+            </div>
+            <div style="width:20px"></div>
+            <div class="grow">
+              <h3>Skill Bar (1-4)</h3>
+              <p class="muted" style="font-size:13px">Choose a skill for each slot. Pick "unassigned" to free a slot.</p>
+              <div class="skill-pick" id="shrine-skills"></div>
+              <div class="spacer"></div>
+              <div class="row">
+                <button class="primary" id="btn-shrine-close">Close</button>
+              </div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="row" id="shrine-trophies"></div>
+        </div>
+      </div>
+
+      <!-- Stash -->
+      <div class="screen" id="stash-screen">
+        <div class="panel">
+          <h2>Stash</h2>
+          <div class="row" style="align-items:flex-start">
+            <div class="grow">
+              <h3>Stash</h3>
+              <div class="grid stash-grid scroll" id="stash-grid" style="max-height:48vh"></div>
+            </div>
+            <div style="width:20px"></div>
+            <div class="grow">
+              <h3>Bag</h3>
+              <div class="grid inv-grid scroll" id="stash-bag" style="max-height:48vh"></div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <span class="muted">Click an item to move it between stash and bag.</span>
+            <span class="grow"></span>
+            <button class="primary" id="btn-stash-close">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rift selection -->
+      <div class="screen" id="rift-screen">
+        <div class="panel">
+          <h2>Open a Rift</h2>
+          <h3>Rift Level</h3>
+          <div class="level-btns" id="rift-levels"></div>
+          <div class="spacer"></div>
+          <h3>Rift Type</h3>
+          <div class="row" id="rift-types"></div>
+          <div class="spacer"></div>
+          <div class="row">
+            <button class="primary" id="btn-rift-enter">Enter Rift</button>
+            <button id="btn-rift-cancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="toasts"></div>
+      <div id="banner"><h1 id="banner-title"></h1><p id="banner-sub" class="subtitle"></p></div>
+      <div id="tooltip"></div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
